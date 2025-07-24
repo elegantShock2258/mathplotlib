@@ -6,7 +6,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 
-class FlowStatsParser:
+class BarGraphAnalyser:
     def __init__(self, file_path):
         self.file_path = file_path
         self.flow_data = defaultdict(lambda: {
@@ -195,7 +195,7 @@ class FlowStatsParser:
             axs = [[axs[i]] for i in range(num_metrics)]  # reshape to 2D
 
         for col, (tr_file, label) in enumerate(zip(trace_files, labels)):
-            parser = FlowStatsParser(tr_file)
+            parser = BarGraphAnalyser(tr_file)
             parser.parse()
             parser.compute()
 

@@ -1,2 +1,1 @@
-from .parser import FlowStatsParser
-from .multiplot import 
+from .parser import BarGraphAnalyser
