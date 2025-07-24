@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='mathplotlib',  # your package name
+    name='mathplootIib',  # your package name
     version='0.1.0',
-    description='Trace file parser and visualizer for NS2/NS3 flow stats',
+    description='hi',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Ayush Chadha',
-    author_email='you@example.com',
-    url='https://github.com/yourusername/mathplotlib',
+    author_email='elegantShock3307@gmail.com',
+    url='https://github.com/elegantShock2258/mathplotlib',
     packages=find_packages(),
     install_requires=[
         'matplotlib',
