@@ -6,7 +6,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 
-class BarGraphAnalyser:
+class Line_Plot:
     def __init__(self, file_path):
         self.file_path = file_path
         self.flow_data = defaultdict(lambda: {
@@ -142,6 +142,10 @@ class BarGraphAnalyser:
         print(f"Saved flow stats table to: {output_file}")
 
     def plot_all_metrics(self, output_file="all_metrics.png"):
+        self.parse()
+        self.compute()
+        self.print_summary()
+        
         metrics = {
             "End-to-End Delay (s)": "delay_trace",
             "Inter-packet Delay (s)": "inter_arrival",
@@ -175,8 +179,11 @@ class BarGraphAnalyser:
         plt.savefig(output_file, dpi=300)
         print(f"Saved all flow metric graphs to: {output_file}")
 
-    @staticmethod
-    def compare_multiple_traces(trace_files, labels=None, output_file="comparison_metrics.png"):
+    def compare_multiple_traces(self,trace_files, labels=None, output_file="comparison_metrics.png"):
+        self.parse()
+        self.compute()
+        self.print_summary()
+        
         if labels is None:
             labels = [os.path.splitext(os.path.basename(f))[0] for f in trace_files]
 
@@ -195,7 +202,7 @@ class BarGraphAnalyser:
             axs = [[axs[i]] for i in range(num_metrics)]  # reshape to 2D
 
         for col, (tr_file, label) in enumerate(zip(trace_files, labels)):
-            parser = BarGraphAnalyser(tr_file)
+            parser = Line_Plot(tr_file)
             parser.parse()
             parser.compute()
 
