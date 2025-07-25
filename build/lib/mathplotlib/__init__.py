@@ -1,1 +1,1 @@
-from .parser import BarGraphAnalyser
+from .parser import Line_Graph
