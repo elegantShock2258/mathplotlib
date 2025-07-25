@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mathplootIib',  # your package name
-    version='0.20',
+    version='0.25',
     description='hi',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

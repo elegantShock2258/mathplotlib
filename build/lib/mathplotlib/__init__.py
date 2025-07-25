@@ -1,1 +1,1 @@
-from .parser import Line_Graph
+from .parser import Line_Plot
