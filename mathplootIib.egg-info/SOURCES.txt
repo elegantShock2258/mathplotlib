@@ -6,4 +6,5 @@ mathplootIib.egg-info/SOURCES.txt
 mathplootIib.egg-info/dependency_links.txt
 mathplootIib.egg-info/top_level.txt
 mathplotlib/__init__.py
+mathplotlib/nummpy.py
 mathplotlib/parser.py

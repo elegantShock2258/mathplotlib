@@ -1,7 +1,7 @@
 class Axes:
     def __init__(self):
         print("jo")
-    def Xaxis(self):
+    def Xaxis():
         return """set ns [new Simulator]
 set nf [open aloha_slotted.tr w]
 $ns trace-all $nf
@@ -37,7 +37,7 @@ proc finish {} {
 $ns run
 """
     
-    def Yaxis(self):
+    def Yaxis():
         return """
 set ns [new Simulator]
 set nf [open aloha.tr w]
@@ -73,7 +73,7 @@ proc finish {} {
 
 $ns run
 """
-    def Zaxis(self):
+    def Zaxis():
         return """
 set ns [new Simulator]
 set nf [open csma.tr w]
