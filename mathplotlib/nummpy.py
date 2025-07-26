@@ -130,3 +130,94 @@ proc finish {} {
 
 $ns run
 """
+
+    def setAxisScale(self):
+        return """
+set ns [new Simulator]
+set tracefile [open "star.tr" w]
+$ns trace-all $tracefile
+
+set numNodes 5
+set rootNode [$ns node]
+
+for {set i 0} {$i < $numNodes} {incr i} {
+    set node($i) [$ns node]
+    $ns duplex-link $node($i) $rootNode 10ms 1Mb DropTail
+
+    set udp($i) [new Agent/UDP]
+    set null($i) [new Agent/Null]
+
+    $ns attach-agent $node($i) $udp($i)
+    $ns attach-agent $rootNode $null($i)
+
+    $ns connect $udp($i) $null($i)
+
+    set cbr($i) [new Application/Traffic/CBR]
+    $cbr($i) set packetSize_ 500
+    $cbr($i) set interval_ 0.05
+    $cbr($i) attach-agent $udp($i)
+
+    $ns at 0.5 "$cbr($i) start"
+    $ns at 5.0 "$cbr($i) stop"
+}
+
+proc finish {} {
+    puts "Star topology simulation finished"
+    global tracefile ns
+    $ns flush-trace
+    close $tracefile
+    exit 0
+}
+$ns at 6.0 "finish"
+$ns run
+"""
+    def setAxisTicks(self):
+        return """
+set ns [new Simulator]
+set tracefile [open "ring.tr" w]
+$ns trace-all $tracefile
+set namfile [open "ring.nam" w]
+$ns namtrace-all $namfile
+
+set numNodes 100
+
+for {set i 0} {$i < $numNodes} {incr i} {
+    set node($i) [$ns node]
+}
+
+for {set i 0} {$i < $numNodes} {incr i} {
+    $ns duplex-link $node($i) $node([expr ($i+1)%$numNodes]) 10ms 1Mb DropTail
+}
+
+
+for {set i 0} {$i < $numNodes} {incr i} {
+    set tcp($i) [new Agent/UDP]
+    set NullNode($i) [new Agent/Null]
+    
+    $ns attach-agent $node(0) $tcp($i)
+    $ns attach-agent $node($i) $NullNode($i)
+    $ns connect $tcp($i) $NullNode($i)
+
+    set cbr($i) [new Application/Traffic/CBR]
+    $cbr($i) set packetSize_ 200
+    $cbr($i) set interval_ 0.01
+    $cbr($i) attach-agent $tcp($i)
+    
+    $ns at 0.5 "$cbr($i) start"
+    $ns at 5.0 "$cbr($i) stop"
+}
+
+
+proc finish {} {
+    puts "ring finish"
+    global tracefile ns
+    global namfile ns
+    $ns flush-trace
+    close $tracefile
+    close $namfile 
+    exit 0 
+}
+
+$ns at 6.0 "finish"
+$ns run 
+"""

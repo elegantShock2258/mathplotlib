@@ -3,6 +3,7 @@ import statistics
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 
 class Line_Plot:
@@ -40,19 +41,17 @@ class Line_Plot:
                 dst = parts[3]
                 pkt_type = parts[4]
                 pkt_size = int(parts[5])
-                fid = parts[7]
+                flow_id = parts[7]
                 seq_no = parts[10]
 
-                # Enhanced flow_id to track flows between any two nodes
-                flow_id = f"{src}->{dst}:{fid}"
                 flow = self.flow_data[flow_id]
                 flow["proto"] = pkt_type
 
-                if event == "+":
+                if event == "+" and src == "0":
                     flow["sent"] += 1
                     flow["send_time"][seq_no] = time
 
-                elif event == "r":
+                elif event == "r" and dst == "1":
                     flow["received"] += 1
                     flow["receive_time"][seq_no] = time
                     flow["sizes"].append(pkt_size)
@@ -100,9 +99,9 @@ class Line_Plot:
         return self.stats
 
     def print_summary(self):
-        print(f"\n{'Flow':<15} {'Proto':<6} {'Sent':<6} {'Recv':<6} {'Drop':<6} {'PDR':<6} {'AvgDelay(s)':<14} {'Jitter(s)':<12} {'Throughput(kbps)':<16}")
+        print(f"\n{'Flow':<6} {'Proto':<6} {'Sent':<6} {'Recv':<6} {'Drop':<6} {'PDR':<6} {'AvgDelay(s)':<14} {'Jitter(s)':<12} {'Throughput(kbps)':<16}")
         for fid, s in self.stats.items():
-            print(f"{fid:<15} {s['Protocol']:<6} {s['Packets Sent']:<6} {s['Packets Received']:<6} {s['Packets Dropped']:<6} "
+            print(f"{fid:<6} {s['Protocol']:<6} {s['Packets Sent']:<6} {s['Packets Received']:<6} {s['Packets Dropped']:<6} "
                   f"{s['PDR']:<6} {s['Avg Delay (s)']:<14} {s['Jitter (s)']:<12} {s['Throughput (kbps)']:<16}")
 
     def plot_table(self, output_file="flowstats.png"):
@@ -179,3 +178,58 @@ class Line_Plot:
         plt.tight_layout(rect=[0, 0, 1, 0.97])
         plt.savefig(output_file, dpi=300)
         print(f"Saved all flow metric graphs to: {output_file}")
+
+    def compare_multiple_traces(self,trace_files, labels=None, output_file="comparison_metrics.png"):
+        self.parse()
+        self.compute()
+        self.print_summary()
+        
+        if labels is None:
+            labels = [os.path.splitext(os.path.basename(f))[0] for f in trace_files]
+
+        metrics = {
+            "End-to-End Delay (s)": "delay_trace",
+            "Inter-packet Delay (s)": "inter_arrival",
+            "Throughput (kbps)": "throughput_trace",
+            "Cumulative Received Packets": "recv_time_series"
+        }
+
+        num_metrics = len(metrics)
+        num_traces = len(trace_files)
+        fig, axs = plt.subplots(num_metrics, num_traces, figsize=(5 * num_traces, 3 * num_metrics), sharex='col')
+
+        if num_traces == 1:
+            axs = [[axs[i]] for i in range(num_metrics)]  # reshape to 2D
+
+        for col, (tr_file, label) in enumerate(zip(trace_files, labels)):
+            parser = Line_Plot(tr_file)
+            parser.parse()
+            parser.compute()
+
+            flow_ids = list(parser.flow_data.keys())
+            colors = list(cm.get_cmap("tab10").colors)
+
+            for row, (metric_name, key) in enumerate(metrics.items()):
+                ax = axs[row][col]
+                for i, fid in enumerate(flow_ids):
+                    data = parser.flow_data[fid]
+                    series = sorted(data[key])
+                    if not series:
+                        continue
+                    times = [pt[0] for pt in series]
+                    values = [pt[1] for pt in series]
+                    color = colors[i % len(colors)]
+                    ax.plot(times, values, label=f"Flow {fid}", color=color, marker='o', linewidth=1)
+
+                ax.set_title(f"{metric_name}\n({label})")
+                ax.grid(True, linestyle='--', alpha=0.5)
+                if row == num_metrics - 1:
+                    ax.set_xlabel("Time (s)")
+                if col == 0:
+                    ax.set_ylabel(metric_name)
+
+        handles, legend_labels = axs[0][0].get_legend_handles_labels()
+        fig.legend(handles, legend_labels, loc='lower center', ncol=len(legend_labels), bbox_to_anchor=(0.5, -0.01))
+        plt.tight_layout(rect=[0, 0.02, 1, 1])
+        plt.savefig(output_file, dpi=300)
+        print(f"Saved comparison plot to: {output_file}")
