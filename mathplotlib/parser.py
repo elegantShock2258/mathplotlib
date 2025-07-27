@@ -47,11 +47,11 @@ class Line_Plot:
                 flow = self.flow_data[flow_id]
                 flow["proto"] = pkt_type
 
-                if event == "+" and src == "0":
+                if event == "+":
                     flow["sent"] += 1
                     flow["send_time"][seq_no] = time
 
-                elif event == "r" and dst == "1":
+                elif event == "r":
                     flow["received"] += 1
                     flow["receive_time"][seq_no] = time
                     flow["sizes"].append(pkt_size)
